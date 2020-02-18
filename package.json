@@ -1,0 +1,33 @@
+{
+  "name": "mobiledgex.js",
+  "version": "0.0.1",
+  "description": "Javascript Client SDK for MobiledgeX",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha src/index.test.js -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eusholli/mobiledgex.js.git"
+  },
+  "keywords": [
+    "mobiledgex",
+    "sdk",
+    "js",
+    "client"
+  ],
+  "author": "Geoff Hollingworth <eusholli@gmail.com> (https://linkedin.com/in/geoffhollingworth)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/eusholli/mobiledgex.js/issues"
+  },
+  "homepage": "https://github.com/eusholli/mobiledgex.js#readme",
+  "dependencies": {
+    "es6-promise": "4.2.8",
+    "isomorphic-fetch": "2.2.1"
+  },
+  "devDependencies": {
+    "chai": "4.2.0",
+    "mocha": "7.0.1"
+  }
+}
