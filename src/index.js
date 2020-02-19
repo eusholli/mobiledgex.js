@@ -133,13 +133,13 @@ class GPSLocation {
             timestamp = Math.floor(Date.now() / 1000);
         }
 
-        this.timestamp = timestamp.toString();
-        /*
-                this.timestamp = {
-                    "seconds": timestamp.toString(),
-                    "nanos": 0
-                };
-        */
+        // this.timestamp = timestamp.toString();
+
+        this.timestamp = {
+            "seconds": timestamp.toString(),
+            "nanos": 0
+        };
+
         this.course = course;
         this.speed = speed;
         this.vertical_accuracy = vertical_accuracy;
@@ -168,35 +168,39 @@ class MobiledgeXClient {
         unique_id, // optional
         unique_id_type, // optional
     ) {
-        fetch.fetchResource(registerAPI, {
-            method: 'POST',
-            body: {
-                app_name: this.app_name,
-                app_vers: this.app_vers,
-                auth_token, // optional
-                carrier_name, // not currently used
-                cell_id, // optional
-                dev_name: this.dev_name,
-                tags,  // optional
-                unique_id, // optional
-                unique_id_type, // optional
-                ver: 1
-            }
-        }).then(userData => {
-            // Do something with the "data"
-            console.log(userData);
-            this.session_cookie = userData.session_cookie;
-            const gps_location = new GPSLocation();
-            gps_location.setLocation(10, 10, 0);
-            client.findCloudlet('wifi', gps_location);
-        })
-            .catch(error => {
-                // Handle error
-                // error.message (error text)
-                // error.status (HTTTP status or 'REQUEST_FAILED')
-                // error.response (text, object or null)
-                console.log(error);
+        let self = this;
+        return new Promise(function (resolve, reject) {
+
+            fetch.fetchResource(registerAPI, {
+                method: 'POST',
+                body: {
+                    app_name: self.app_name,
+                    app_vers: self.app_vers,
+                    auth_token, // optional
+                    carrier_name, // not currently used
+                    cell_id, // optional
+                    dev_name: self.dev_name,
+                    tags,  // optional
+                    unique_id, // optional
+                    unique_id_type, // optional
+                    ver: 1
+                }
+            }).then(userData => {
+                // Do something with the "data"
+                console.log(userData);
+                self.session_cookie = userData.session_cookie;
+                resolve(userData);
             })
+                .catch(error => {
+                    // Handle error
+                    // error.message (error text)
+                    // error.status (HTTTP status or 'REQUEST_FAILED')
+                    // error.response (text, object or null)
+                    console.log(error);
+                    reject(error)
+                })
+
+        })
     }
     findCloudlet(
         carrier_name,
@@ -204,43 +208,48 @@ class MobiledgeXClient {
         cell_id = 0, // optional
         tags = [] // optional
     ) {
-        const jsonLocation = JSON.stringify(gps_location);
-        fetch.fetchResource(findcloudletAPI, {
-            method: 'POST',
-            body: {
-                session_cookie: this.session_cookie,
-                /*
-                "carrierName": "wifi",
-                "gps_location": { "latitude": 49.282, "longitude": 123.11 }
-                */
-                app_name: this.app_name,
-                app_vers: this.app_vers,
-                session_cookie: this.session_cookie,
-                carrier_name, // not currently used
-                cell_id, // optional
-                dev_name: this.dev_name,
-                gps_location: jsonLocation,
-                tags,  // optional
-                ver: 1,
-            }
-        }).then(userData => {
-            // Do something with the "data"
-            console.log(userData);
-            // this.session_cookie = userData.session_cookie;
-        })
-            .catch(error => {
-                // Handle error
-                // error.message (error text)
-                // error.status (HTTTP status or 'REQUEST_FAILED')
-                // error.response (text, object or null)
-                console.log(error);
+        let self = this;
+        return new Promise(function (resolve, reject) {
+
+            const jsonLocation = JSON.stringify(gps_location);
+            fetch.fetchResource(findcloudletAPI, {
+                method: 'POST',
+                body: {
+                    session_cookie: self.session_cookie,
+                    /*
+                    "carrierName": "wifi",
+                    "gps_location": { "latitude": 49.282, "longitude": 123.11 }
+                    */
+                    app_name: self.app_name,
+                    app_vers: self.app_vers,
+                    session_cookie: self.session_cookie,
+                    carrier_name, // not currently used
+                    cell_id, // optional
+                    dev_name: self.dev_name,
+                    gps_location: gps_location,
+                    tags,  // optional
+                    ver: 1,
+
+                }
+            }).then(userData => {
+                // Do something with the "data"
+                console.log(userData);
+                resolve(userData);
             })
+                .catch(error => {
+                    // Handle error
+                    // error.message (error text)
+                    // error.status (HTTTP status or 'REQUEST_FAILED')
+                    // error.response (text, object or null)
+                    console.log(error.response);
+                    reject(error)
+                })
+        })
     }
 
     verifyLocation() {
 
     }
-
 }
 
 module.exports = {
@@ -248,6 +257,14 @@ module.exports = {
 }
 
 client = new MobiledgeXClient(devName, appName, appVersionStr);
-client.registerClient();
+client.registerClient().then(userData => {
+    console.log(userData);
+    const gps_location = new GPSLocation();
+    gps_location.setLocation(10, 10, 0);
+    client.findCloudlet('wifi', gps_location);
+}).catch(error => {
+    console.log("Error" + error);
+});
+
 
 
