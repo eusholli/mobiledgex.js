@@ -11,7 +11,7 @@
     "build:main": "babel --out-dir dist --ignore *.test.js src",
     "build:umd": "webpack --mode development --output-filename index.umd.js",
     "build:umd.min": "webpack --mode production --output-filename index.umd.min.js -p",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
