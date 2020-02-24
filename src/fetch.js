@@ -53,7 +53,11 @@ const fetchResource = (path, userOptions = {}) => {
   };
 
   // Build Url
-  const url = `${API_URL}${path}`;
+  let carrier = userOptions.body['carrier_name'] ? userOptions.body['carrier_name'] : carrierNameDefault;
+  const thisUrl = 'https://' + carrier + '.' + baseDmeHost + ':' + dmePort;
+  const url = `${thisUrl}${path}`;
+  // console.log(url);
+  // console.log(userOptions);
 
   // Detect is we are uploading a file
   // const isFile = options.body instanceof File;
