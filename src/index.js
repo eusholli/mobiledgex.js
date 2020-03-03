@@ -1,24 +1,6 @@
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
-const fetch = require('./fetch');
-
-/*
-"carrier_name": "string",
-"unique_id": "string",
-"tags": [
-    {
-    "type": "string",
-    "data": "string"
-    }
-],
-"cell_id": 0,
-"dev_name": "string",
-"unique_id_type": "string",
-"auth_token": "string",
-"ver": 0,
-"app_vers": "string",
-"app_name": "string"
-*/
+import polyfill from 'es6-promise';
+import 'isomorphic-fetch';
+import fetch from './fetch';
 
 // API Paths:
 const registerAPI = "/v1/registerclient";
@@ -47,7 +29,7 @@ function getCurrentPosition() {
     }
 }
 
-class GPSLocation {
+export class GPSLocation {
     constructor() {
         this.latitude = null;
         this.longitude = null;
@@ -151,7 +133,7 @@ class GPSLocation {
     }
 }
 
-class MobiledgeXClient {
+export class MobiledgeXClient {
 
     // class methods
     constructor(dev_name,
@@ -284,7 +266,7 @@ class MobiledgeXClient {
     }
 }
 
-function initLocalhostDME(localhostAppConfig) {
+export function initLocalhostDME(localhostAppConfig) {
     localhostDME = localhostAppConfig;
 }
 
@@ -306,7 +288,7 @@ function handleLocalhost(resolve, reject, appName) {
     }
 }
 
-function findClosestCloudlet(devName, appName, appVersionStr, carrierName, gpsLocation) {
+export function findClosestCloudlet(devName, appName, appVersionStr, carrierName, gpsLocation) {
 
     return new Promise(function (resolve, reject) {
 
@@ -326,14 +308,14 @@ function findClosestCloudlet(devName, appName, appVersionStr, carrierName, gpsLo
     })
 }
 
+/*
 module.exports = {
     MobiledgeXClient: MobiledgeXClient,
     GPSLocation: GPSLocation,
     initLocalhostDME: initLocalhostDME,
     findClosestCloudlet: findClosestCloudlet
 }
-
-
+*/
 
 initLocalhostDME({
     "MobiledgeX SDK Demo": {

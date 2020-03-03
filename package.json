@@ -2,17 +2,19 @@
   "name": "mobiledgex.js",
   "version": "0.0.0-development",
   "description": "Javascript Client SDK for MobiledgeX",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "commit": "git-cz",
-    "check-coverage": "istanbul check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
+    "check-coverage": "nyc check-coverage --statements 50 --branches 20 --functions 50 --lines 50",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
-    "test": "mocha src/index.test.js -w --require @babel/register",
-    "test:single": "istanbul cover -x *.test.js _mocha -- -R spec src/index.test.js",
+    "watch:test": "npm t -- -w",
+    "test": "mocha src/index.test.js --require @babel/register",
+    "cover": "nyc npm t",
     "prebuild": "rimraf dist",
-    "build:main": "babel --out-dir dist --ignore *.test.js src",
+    "build:main": "babel --out-dir dist --ignore **/*.test.js src",
     "build:umd": "webpack --mode development --output-filename index.umd.js",
     "build:umd.min": "webpack --mode production --output-filename index.umd.min.js -p",
+    "build": "npm-run-all --parallel build:*",
     "semantic-release": "semantic-release"
   },
   "repository": {
@@ -43,6 +45,7 @@
     "@babel/cli": "7.8.4",
     "@babel/core": "7.8.4",
     "@babel/preset-env": "7.8.4",
+    "@babel/register": "7.8.6",
     "babel-loader": "8.0.6",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
@@ -53,6 +56,8 @@
     "istanbul": "0.4.5",
     "json-loader": "0.5.7",
     "mocha": "7.0.1",
+    "npm-run-all": "4.1.5",
+    "nyc": "15.0.0",
     "rimraf": "3.0.2",
     "semantic-release": "^17.0.4",
     "webpack": "4.41.6",
@@ -68,7 +73,7 @@
       "path": "node_modules/cz-conventional-changelog"
     },
     "ghooks": {
-      "pre-commit": "npm run test:single && npm run check-coverage"
+      "pre-commit": "npm run cover && npm run check-coverage"
     }
   }
 }

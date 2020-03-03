@@ -1,3 +1,7 @@
+#Geoff additions
+.DS_Store
+package-lock.json
+
 # Editor config
 .vscode
 

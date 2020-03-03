@@ -7,13 +7,13 @@ export default {
     output: {
         path: join(__dirname, 'dist'),
         libraryTarget: 'umd',
-        library: 'mobiledgexClient',
+        library: 'MobiledgexClient',
     },
     devtool: 'source-map',
     module: {
-        loaders: [
-            { test: /\.js$/, loader: 'babel', include },
-            { test: /\.json$/, loader: 'json', include },
+        rules: [
+            { test: /\.js$/, use: 'babel-loader', include },
+            { test: /\.json$/, use: 'json-loader', include },
         ]
     }
 }

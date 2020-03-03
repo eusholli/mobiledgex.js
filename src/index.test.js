@@ -1,19 +1,26 @@
-var assert = require('assert');
-var expect = require('chai').expect;
-var should = require('chai').should();
+import assert from 'assert';
+import expect from 'chai';
+import should from 'chai';
 
-var chai = require('chai');
-var chaiAsPromised = require('chai-as-promised');
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 chai.use(chaiAsPromised).should();
 
+import { MobiledgeXClient, GPSLocation, initLocalhostDME, findClosestCloudlet } from './index.js';
+/*
 var mobiledgeXClient = require('./index.js').MobiledgeXClient;
 var GPSLocation = require('./index.js').GPSLocation;
 var initLocalhostDME = require('./index.js').initLocalhostDME;
 var findClosestCloudlet = require('./index.js').findClosestCloudlet;
+*/
 
 const devName = "MobiledgeX"; // Your developer name
 const appName = "MobiledgeX SDK Demo"; // Your application name
 const appVersionStr = "2.0";
+
+let client = undefined;
+let failClient = undefined;
+let gps_location = undefined;
 
 before('Create MobiledgeXClient', function () {
     console.log('before');
@@ -24,8 +31,8 @@ before('Create MobiledgeXClient', function () {
             port: '8080'
         }
     })
-    client = new mobiledgeXClient(devName, appName, appVersionStr);
-    failClient = new mobiledgeXClient(devName, "fail", appVersionStr);
+    client = new MobiledgeXClient(devName, appName, appVersionStr);
+    failClient = new MobiledgeXClient(devName, "fail", appVersionStr);
 
     gps_location = new GPSLocation();
     gps_location.setLocation(10, 10, 0);
