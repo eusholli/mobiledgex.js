@@ -63,6 +63,23 @@ describe('mobiledgeXClient findcloudlet', function () {
 
 describe('mobiledgeXClient findClosestCloudlet', function () {
     it('should return a valid app Url from the localhostDME configuration', function () {
+        return client.findClosestCloudlet('localhost', gps_location)
+            .should.eventually.be.a('string');
+    });
+    it('should return a valid app Url from the wifi network DME', function () {
+        return client.findClosestCloudlet('wifi', gps_location)
+            .should.eventually.be.a('string');
+    });
+    it('should return an error due to bad app name "fail" on localhost', function () {
+        return failClient.findClosestCloudlet('localhost', gps_location).should.eventually.be.rejected;
+    })
+    it('should return an error due to bad app name "fail" on wifi DME', function () {
+        return failClient.findClosestCloudlet('wifi', gps_location).should.eventually.be.rejected;
+    })
+});
+
+describe('None-Client findClosestCloudlet', function () {
+    it('should return a valid app Url from the localhostDME configuration', function () {
         return findClosestCloudlet(devName, appName, appVersionStr, 'localhost', gps_location)
             .should.eventually.be.a('string');
     });
@@ -70,10 +87,10 @@ describe('mobiledgeXClient findClosestCloudlet', function () {
         return findClosestCloudlet(devName, appName, appVersionStr, 'wifi', gps_location)
             .should.eventually.be.a('string');
     });
-    it('should return an error due to bad developer name "fail" on localhost', function () {
+    it('should return an error due to bad app name "fail" on localhost', function () {
         return findClosestCloudlet(devName, 'fail', appVersionStr, 'localhost', gps_location).should.eventually.be.rejected;
     })
-    it('should return an error due to bad developer name "fail" on wifi DME', function () {
+    it('should return an error due to bad app name "fail" on wifi DME', function () {
         return findClosestCloudlet(devName, 'fail', appVersionStr, 'wifi', gps_location).should.eventually.be.rejected;
     })
 });

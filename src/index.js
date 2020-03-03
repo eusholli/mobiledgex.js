@@ -152,10 +152,11 @@ class GPSLocation {
 }
 
 class MobiledgeXClient {
+
     // class methods
     constructor(dev_name,
         app_name,
-        app_vers, ) {
+        app_vers) {
         this.dev_name = dev_name;
         this.app_name = app_name;
         this.app_vers = app_vers;
@@ -168,7 +169,7 @@ class MobiledgeXClient {
         cell_id, // optional
         tags,  // optional
         unique_id, // optional
-        unique_id_type, // optional
+        unique_id_type // optional
     ) {
         let self = this;
         return new Promise(function (resolve, reject) {
@@ -189,7 +190,6 @@ class MobiledgeXClient {
                 }
             }).then(userData => {
                 // Do something with the "data"
-                console.log(userData);
                 self.session_cookie = userData.session_cookie;
                 resolve(userData);
             })
@@ -204,6 +204,7 @@ class MobiledgeXClient {
 
         })
     }
+
     static buildAppUrls(configData) {
 
         let fqdn = configData.fqdn;
@@ -258,6 +259,26 @@ class MobiledgeXClient {
         })
     }
 
+    findClosestCloudlet(carrierName, gpsLocation) {
+
+        let self = this;
+        return new Promise(function (resolve, reject) {
+
+            if (carrierName === 'localhost') {
+                return handleLocalhost(resolve, reject, self.app_name);
+            } else {
+                self.findCloudlet(carrierName, gpsLocation).then(response => {
+                    let appUrls = MobiledgeXClient.buildAppUrls(response);
+                    resolve(appUrls[0]);
+
+                }).catch(error => {
+                    console.log("Error" + error);
+                    reject('FIND_NOTFOUND');
+                });
+            }
+        })
+    }
+
     verifyLocation() {
 
     }
@@ -267,11 +288,22 @@ function initLocalhostDME(localhostAppConfig) {
     localhostDME = localhostAppConfig;
 }
 
-module.exports = {
-    MobiledgeXClient: MobiledgeXClient,
-    GPSLocation: GPSLocation,
-    initLocalhostDME: initLocalhostDME,
-    findClosestCloudlet: findClosestCloudlet
+function handleLocalhost(resolve, reject, appName) {
+    if (appName in localhostDME) {
+        let appConfig = localhostDME[appName];
+        let appUrls = MobiledgeXClient.buildAppUrls({
+            fqdn: appConfig.fqdn,
+            ports: [
+                {
+                    fqdn_prefix: appConfig.fqdn_prefix,
+                    public_port: appConfig.port
+                }
+            ]
+        });
+        resolve(appUrls[0]);
+    } else {
+        reject('FIND_NOTFOUND');
+    }
 }
 
 function findClosestCloudlet(devName, appName, appVersionStr, carrierName, gpsLocation) {
@@ -279,41 +311,29 @@ function findClosestCloudlet(devName, appName, appVersionStr, carrierName, gpsLo
     return new Promise(function (resolve, reject) {
 
         if (carrierName === 'localhost') {
-            if (appName in localhostDME) {
-                let appConfig = localhostDME[appName];
-                let appUrls = MobiledgeXClient.buildAppUrls({
-                    fqdn: appConfig.fqdn,
-                    ports: [
-                        {
-                            fqdn_prefix: appConfig.fqdn_prefix,
-                            public_port: appConfig.port
-                        }
-                    ]
-                });
-                resolve(appUrls[0]);
-            } else {
-                reject('FIND_NOTFOUND');
-            }
-
+            return handleLocalhost(resolve, reject, appName);
         } else {
-            client = new MobiledgeXClient(devName, appName, appVersionStr);
+            let client = new MobiledgeXClient(devName, appName, appVersionStr);
             client.registerClient().then(userData => {
-                // console.log(userData);
-                client.findCloudlet(carrierName, gpsLocation).then(response => {
-                    let appUrls = MobiledgeXClient.buildAppUrls(response);
-                    resolve(appUrls[0]);
-
-                }).catch(error => {
-                    console.log("Error" + error);
-                    reject('FIND_NOTFOUND');
-                });
+                client.findClosestCloudlet(carrierName, gps_location).then(url => {
+                    resolve(url);
+                })
             }).catch(error => {
-                console.log("Error" + error);
+                console.log("Error: " + error);
                 reject('FIND_NOTFOUND');
             });
         }
     })
 }
+
+module.exports = {
+    MobiledgeXClient: MobiledgeXClient,
+    GPSLocation: GPSLocation,
+    initLocalhostDME: initLocalhostDME,
+    findClosestCloudlet: findClosestCloudlet
+}
+
+
 
 initLocalhostDME({
     "MobiledgeX SDK Demo": {
@@ -323,8 +343,26 @@ initLocalhostDME({
     }
 })
 
+let client = new MobiledgeXClient(devName, appName, appVersionStr);
 const gps_location = new GPSLocation();
 gps_location.setLocation(10, 10, 0);
+
+
+client.registerClient().then(userData => {
+
+    client.findClosestCloudlet('localhost', gps_location).then(url => {
+        console.log('localhost: ' + url);
+    }).catch(error => {
+        console.log("Error" + error);
+    });
+
+    client.findClosestCloudlet('wifi', gps_location).then(url => {
+        console.log('wifi: ' + url);
+    }).catch(error => {
+        console.log("Error" + error);
+    });
+})
+
 findClosestCloudlet(devName, appName, appVersionStr, 'localhost', gps_location).then(url => {
     console.log('localhost: ' + url);
 }).catch(error => {
@@ -336,6 +374,5 @@ findClosestCloudlet(devName, appName, appVersionStr, 'wifi', gps_location).then(
 }).catch(error => {
     console.log("Error" + error);
 });
-
 
 

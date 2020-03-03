@@ -7,7 +7,7 @@
     "commit": "git-cz",
     "check-coverage": "istanbul check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
-    "test": "mocha src/index.test.js -w",
+    "test": "mocha src/index.test.js -w --require @babel/register",
     "test:single": "istanbul cover -x *.test.js _mocha -- -R spec src/index.test.js",
     "prebuild": "rimraf dist",
     "build:main": "babel --out-dir dist --ignore *.test.js src",
@@ -24,6 +24,10 @@
     "sdk",
     "js",
     "client"
+  ],
+  "files": [
+    "dist",
+    "README.md"
   ],
   "author": "Geoff Hollingworth <eusholli@gmail.com> (https://linkedin.com/in/geoffhollingworth)",
   "license": "Apache-2.0",
