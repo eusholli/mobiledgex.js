@@ -18,6 +18,8 @@ The SDK has implemented findClosestCloudlet in two ways.
 For more information about MobiledgeX Edge-Cloud please visit the MobiledgeX website [here](https://mobiledgex.com).
 If you are interested to learn more about potential use cases where this capability is needed, please the open community edge use case initiative [here](https://seamster.com). We hope you join and also start to contribute.
 
+The supporting library is published [here](https://www.npmjs.com/package/mobiledgex.js).
+
 For information on other more advanced SDKs, for Android, IOS and Unity for example, please see [here](https://developers.mobiledgex.com).
 
 ## Tested Environment
