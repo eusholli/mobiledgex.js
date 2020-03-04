@@ -26,9 +26,7 @@ before('Create MobiledgeXClient', function () {
     console.log('before');
     initLocalhostDME({
         "MobiledgeX SDK Demo": {
-            fqdn_prefix: '',
-            fqdn: 'localhost',
-            port: '8080'
+            url: 'localhost:8080'
         }
     })
     client = new MobiledgeXClient(devName, appName, appVersionStr);

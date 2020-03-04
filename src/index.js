@@ -187,11 +187,11 @@ export class MobiledgeXClient {
         })
     }
 
-    static buildAppUrls(configData) {
+    static buildAppUrls(dmeData) {
 
-        let fqdn = configData.fqdn;
+        let fqdn = dmeData.fqdn;
         let appUrls = [];
-        configData.ports.forEach(port => {
+        dmeData.ports.forEach(port => {
             appUrls.push(port.fqdn_prefix + fqdn + ':' + port.public_port);
         });
         return appUrls;
@@ -273,16 +273,7 @@ export function initLocalhostDME(localhostAppConfig) {
 function handleLocalhost(resolve, reject, appName) {
     if (appName in localhostDME) {
         let appConfig = localhostDME[appName];
-        let appUrls = MobiledgeXClient.buildAppUrls({
-            fqdn: appConfig.fqdn,
-            ports: [
-                {
-                    fqdn_prefix: appConfig.fqdn_prefix,
-                    public_port: appConfig.port
-                }
-            ]
-        });
-        resolve(appUrls[0]);
+        resolve(appConfig.url)
     } else {
         reject('FIND_NOTFOUND');
     }
@@ -319,9 +310,7 @@ module.exports = {
 
 initLocalhostDME({
     "MobiledgeX SDK Demo": {
-        fqdn_prefix: '',
-        fqdn: 'localhost',
-        port: '8080'
+        url: 'localhost:8080'
     }
 })
 
