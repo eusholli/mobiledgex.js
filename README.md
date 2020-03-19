@@ -16,7 +16,7 @@ The SDK has implemented findClosestCloudlet in two ways.
  - Using a JavaScript object where findClosestCloudlet is one method out of many on the object.  Use of the Javascript object prepares for more services being exposed by the MobiledgeX Edge-Cloud platform in the future, which will be exposed as new method calls in the object. It also allows for a more efficient use of the Edge-Cloud system if multiple calls are made per application to update the location of the closest cloudlet during the same session.
 
 For more information about MobiledgeX Edge-Cloud please visit the MobiledgeX website [here](https://mobiledgex.com).
-If you are interested to learn more about potential use cases where this capability is needed, please the open community edge use case initiative [here](https://seamster.com). We hope you join and also start to contribute.
+If you are interested to learn more about potential use cases where this capability is needed, please join [Seamster](https://seamster.com) an initiative for sharing of edge market insights, education and best examples of use cases.  We hope you join and also start to contribute.
 
 The supporting library is published [here](https://www.npmjs.com/package/mobiledgex.js).
 
