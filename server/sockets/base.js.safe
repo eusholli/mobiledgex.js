@@ -1,0 +1,66 @@
+module.exports = function (io) {
+
+    // io stuff here... io.on('conection..... 
+
+    var latency = [];
+    var previousLatency = [];
+    var totalJitter = [];
+    var jitter = [];
+    var pingSampleSize = [];
+    var totalLatency = [];
+    var averageLatency = [];
+
+    io.on("connection", function (socket) {
+        console.log("a user connected");
+        socket.on("disconnect", function () {
+            console.log("user disconnected");
+        });
+
+        socket.on("latencyTest", function () {
+            console.log("latencyTest");
+            socket.emit("latencyResp");
+        });
+
+        socket.on("push latency", function (appName, latest) {
+            console.log("previous latency: " + previousLatency[appName]);
+            console.log("latest latency: " + latest);
+            console.log("previous jitter: " + jitter[appName]);
+
+            latency[appName] = latest;
+
+            if (pingSampleSize[appName] === undefined) {
+                pingSampleSize[appName] = 1;
+                totalJitter[appName] = 0;
+                averageLatency[appName] = latest;
+                totalLatency[appName] = latest;
+
+            } else {
+                totalJitter[appName] = totalJitter[appName] + Math.abs(latest - previousLatency[appName]);
+                jitter[appName] = (totalJitter[appName] / pingSampleSize[appName]).toFixed(2);
+                pingSampleSize[appName]++;
+                totalLatency[appName] += latest;
+                averageLatency[appName] = (totalLatency[appName] / pingSampleSize[appName]).toFixed(2);
+            }
+
+            previousLatency[appName] = latest;
+            console.log("latest jitter: " + jitter[appName]);
+
+            socket.emit("push latency", {
+                'latency': latency[appName],
+                'jitter': jitter[appName],
+                'pings': pingSampleSize[appName],
+                'averageLatency': averageLatency[appName]
+            });
+        });
+
+        socket.on("get latency", function (appName) {
+            console.log("get latency: " + latency[appName]);
+            socket.emit("get latency", {
+                'latency': latency[appName],
+                'jitter': jitter[appName],
+                'pings': pingSampleSize[appName],
+                'averageLatency': averageLatency[appName]
+            });
+        });
+    });
+}

@@ -5,10 +5,11 @@
   "main": "dist/index.js",
   "scripts": {
     "commit": "git-cz",
-    "check-coverage": "nyc check-coverage --statements 50 --branches 20 --functions 50 --lines 50",
-    "report-coverage": "cat ./coverage/lcov.info | codecov",
+    "check-coverage": "nyc check-coverage --statements 80 --branches 70 --functions 80 --lines 80",
+    "report-coverage": "nyc report --reporter=lcov && cat ./coverage/lcov.info | codecov",
     "watch:test": "npm t -- -w",
-    "test": "mocha src/index.test.js --require @babel/register",
+    "test": "mocha src/index.test.js --require @babel/register --timeout 5000",
+    "compile": "babel --out-dir dist --source-maps --watch --ignore **/*.test.js src",
     "cover": "nyc npm t",
     "prebuild": "rimraf dist",
     "build:main": "babel --out-dir dist --ignore **/*.test.js src",
@@ -38,6 +39,7 @@
   },
   "homepage": "https://github.com/eusholli/mobiledgex.js#readme",
   "dependencies": {
+    "country-reverse-geocoding": "0.2.2",
     "es6-promise": "4.2.8",
     "isomorphic-fetch": "2.2.1"
   },
@@ -49,8 +51,8 @@
     "babel-loader": "8.0.6",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
-    "codecov.io": "0.1.6",
-    "commitizen": "4.0.3",
+    "codecov": "3.6.5",
+    "commitizen": "4.0.4",
     "cz-conventional-changelog": "3.1.0",
     "ghooks": "2.0.4",
     "istanbul": "0.4.5",

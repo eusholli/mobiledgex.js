@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>mobiForge geolocation map API demo</title>
+  <style>
+    body,
+    html {
+      height: 100%
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <script src="https://maps.googleapis.com/maps/api/js?sensor=true"></script>
+  <script src="/javascripts/index.umd.js"></script>
+  <script src="/javascripts/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+
+</head>
+
+<body onload="javascript:initPage()">
+  <div id="info">
+    <p>Client: <span id="client"> </span> </p>
+    <p>Cloudlet: <span id="cloudlet"> </span> </p>
+    <p>Pings: <span id="pings"> </span> </p>
+    <p>Latency (ms): <span id="latency"> </span> </p>
+    <p>Average (ms): <span id="average"> </span> </p>
+    <p>Jitter (ms): <span id="jitter"> </span> </p>
+  </div>
+  <div>
+    <h2>Chart</h2>
+    <canvas id="pingChart"></canvas>
+  </div>
+  <div id="map">
+  </div>
+</body>
+
+<script>
+
+  const orgName = "eusholli"; // Your developer name
+  const appName = "Cloudlet Ping"; // Your application name
+  const appVersionStr = "2.0";
+  const appPort = 3000;
+  const pingInterval = 3000;
+
+  let latestLatency = 0;
+  let socket = undefined;
+  let startTime = 0;
+  let initialized = false;
+  let pingChart = undefined;
+  let jitterChart = undefined;
+  let chartXLabels = [0];
+  let pingDataSet = [0];
+  let avPingDataSet = [0];
+  let jitterDataSet = [0];
+  let totalTime = 0;
+
+  function initPage() {
+
+    if (navigator && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+    } else {
+      console.log('Geolocation is not supported');
+      errorCallback();
+    }
+    initializeCharts();
+  }
+
+  function errorCallback() { }
+
+  function successCallback(position) {
+
+    // not needed/used when deployed on real cloudlets
+    MobiledgexClient.initLocalhostController({
+      "Cloudlet Ping": {
+        org_name: orgName,
+        app_version: appVersionStr,
+        fqdn: 'localhost:3000',
+        response: {}
+      }
+    });
+
+    let latitude = position.coords.latitude;
+    let longitude = position.coords.longitude;
+
+    $('#client').text(latitude + ', ' + longitude);
+
+    const gps_location = new MobiledgexClient.GPSLocation();
+    gps_location.setLocation(latitude, longitude, 0);
+
+    MobiledgexClient.findCloudlet(orgName, appName, appVersionStr, gps_location, 'localhost').then(response => {
+      console.log(response);
+      $('#cloudlet').text(response.cloudlet_location.latitude + ', ' + response.cloudlet_location.longitude);
+      initializeGMaps(latitude, longitude, response.cloudlet_location.latitude, response.cloudlet_location.longitude);
+      initializeSocket(response.fqdn);
+    }).catch(error => {
+      console.log("Error" + error);
+    });
+
+  }
+
+  function initializeCharts() {
+
+    var ctx = $('#pingChart')[0].getContext('2d');
+
+    pingChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartXLabels,
+        datasets: [{
+          label: 'Ping',
+          data: pingDataSet,
+          backgroundColor: 'rgb(255,0,0)',
+          borderColor: 'rgb(255,0,0)',
+          borderWidth: 1,
+          fill: false,
+        },
+        {
+          label: 'Average',
+          data: avPingDataSet,
+          backgroundColor: 'rgb(0,0,255)',
+          borderColor: 'rgb(0,0,255)',
+          borderWidth: 1,
+          fill: false,
+        },
+        {
+          label: 'Jitter',
+          data: jitterDataSet,
+          backgroundColor: 'rgb(0,128,0)',
+          borderColor: 'rgb(0,128,0)',
+          borderWidth: 1,
+          fill: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        title: {
+          display: true,
+          text: 'Ping, Jitter'
+        },
+        scales: {
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Latency (ms)'
+            }
+          }],
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Time (sec)'
+            }
+          }]
+        }
+      }
+    });
+  }
+
+  function initializeGMaps(clientLat, clientLong, cloudletLat, cloudletLong) {
+
+    let clientLatlng = new google.maps.LatLng(clientLat, clientLong);
+    let cloudletLatlng = new google.maps.LatLng(cloudletLat, cloudletLong);
+    let map_options = {
+      zoom: 15,
+      center: clientLatlng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+    map_container = document.getElementById('map');
+    let map = new google.maps.Map(map_container, map_options);
+
+    let clientMarker = new google.maps.Marker({
+      position: clientLatlng,
+      map: map,
+      title: 'Client'
+    });
+
+    let cloudletMarker = new google.maps.Marker({
+      position: cloudletLatlng,
+      map: map,
+      title: 'Cloudlet'
+    });
+
+    let route = [
+      clientLatlng,
+      cloudletLatlng
+    ];
+
+    let bounds = new google.maps.LatLngBounds();
+    bounds.extend(clientLatlng);
+    bounds.extend(cloudletLatlng);
+    map.fitBounds(bounds);
+    var listener = google.maps.event.addListener(map, "idle", function () {
+      if (map.getZoom() > 10) map.setZoom(10);
+    });
+
+    let polyline = new google.maps.Polyline({
+      path: route,
+      strokeColor: "#ff0000",
+      strokeOpacity: 0.6,
+      strokeWeight: 5
+    });
+
+    polyline.setMap(map);
+
+  }
+
+  function initializeSocket(url) {
+    socket = io('http://' + url);
+
+    socket.on("connect", function () {
+      if (!initialized) {
+        console.log("socket is connected");
+        setTimeout(doLatency(), 3000);
+        initialized = true;
+      }
+    });
+
+    socket.on("disconnect", function () {
+      console.log("socket is disconnected");
+      initialized = false;
+    });
+
+    socket.on('latencyResp', function () {
+      latestLatency = Date.now() - startTime;
+      console.log("latestLatency: " + latestLatency);
+      // $('#latency').text(latestLatency);
+      socket.emit('push latency', appName, latestLatency);
+    });
+
+    socket.on('push latency', function (data) {
+      $('#latency').text(data.latency);
+      totalTime += (pingInterval / 1000);
+      pingDataSet.push(data.latency);
+      avPingDataSet.push(data.averageLatency);
+      jitterDataSet.push(data.jitter);
+      chartXLabels.push(totalTime);
+      if (data.pings > 10) {
+        pingDataSet.shift();
+        avPingDataSet.shift();
+        jitterDataSet.shift();
+        chartXLabels.shift();
+      }
+
+      pingChart.update();
+
+      $('#pings').text(data.pings);
+      $('#jitter').text(data.jitter);
+      $('#average').text(data.averageLatency);
+    });
+
+    socket.on('get latency', function (data) {
+      console.log("get latency: " + data.latency);
+      console.log("get jitter: " + data.jitter);
+      $('#messages').text(data.latency);
+      latestLatency = data.latency;
+    });
+  }
+
+  function doLatency() {
+    startTime = Date.now();
+    socket.emit('latencyTest');
+    setTimeout(doLatency, pingInterval);
+  }
+</script>
+
+</html>
