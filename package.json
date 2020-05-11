@@ -4,7 +4,6 @@
   "description": "Javascript Client SDK for MobiledgeX",
   "main": "dist/index.js",
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
     "commit": "git-cz",
     "check-coverage": "nyc check-coverage --statements 80 --branches 70 --functions 80 --lines 80",
     "report-coverage": "nyc report --reporter=lcov && cat ./coverage/lcov.info | codecov",
@@ -18,9 +17,6 @@
     "build:umd.min": "webpack --mode production --output-filename index.umd.min.js -p",
     "build": "npm-run-all --parallel build:*",
     "semantic-release": "semantic-release"
-  },
-  "resolutions": {
-    "@babel/preset-env": "7.5.5"
   },
   "repository": {
     "type": "git",
@@ -50,7 +46,7 @@
   "devDependencies": {
     "@babel/cli": "7.8.4",
     "@babel/core": "7.8.4",
-    "@babel/preset-env": "7.8.4",
+    "@babel/preset-env": "7.5.5",
     "@babel/register": "7.8.6",
     "babel-loader": "8.0.6",
     "chai": "4.2.0",
