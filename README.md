@@ -98,7 +98,7 @@ initLocalhostController({
 The simplest call to make is the standalone findCloudlet call.  To make the SDK use the client GPS location to choose the "best" controller it can, simply do not pass the controller name as an argument to the call.
 
 ```javascript
-const devName = "MobiledgeX"; // Your developer name
+const orgName = "MobiledgeX"; // Your Organization name
 const appName = "MobiledgeX SDK Demo"; // Your application name
 const appVersionStr = "2.0"; // the version of your application
 const controller = "localhost" // force the SDK to use the local controller
@@ -134,7 +134,7 @@ gpsLocation.setLocation(
 
 /* SDK selects most appropriate controller based on client GPS location
    and returns best application backend url based on client GPS location */
-findCloudlet(devName, appName, appVersionStr, gpsLocation).then(response => {
+findCloudlet(orgName, appName, appVersionStr, gpsLocation).then(response => {
     console.log('localhost: ' + response.url); //'localhost:8080'
 }).catch(error => {
     console.log(error);
@@ -142,7 +142,7 @@ findCloudlet(devName, appName, appVersionStr, gpsLocation).then(response => {
 
 /* SDK uses named controller ('localhost')
    and returns best application backend url based on client GPS location */
-findCloudlet(devName, appName, appVersionStr, gpsLocation, 'localhost').then(response => {
+findCloudlet(orgName, appName, appVersionStr, gpsLocation, 'localhost').then(response => {
     console.log('localhost: ' + response.url); //'localhost:8080'
 }).catch(error => {
     console.log(error);
@@ -162,7 +162,7 @@ When not explicitly naming the controller, replace the standalone findCloudletCa
 ```javascript
 
 // Create client without named controller
-let client = new MobiledgeXClient(devName, appName, appVersionStr);
+let client = new MobiledgeXClient(orgName, appName, appVersionStr);
 
 // no controller named so client GPS location must be passed in registerClient call
 
@@ -197,7 +197,7 @@ When **explicitly** naming the controller, replace the standalone findCloudletCa
 
 // Create client without named controller
 let controller = 'localhost';
-let client = new MobiledgeXClient(devName, appName, appVersionStr, controller);
+let client = new MobiledgeXClient(orgName, appName, appVersionStr, controller);
 
 let gpsLocation = new GPSLocation();
 
@@ -282,6 +282,3 @@ To test the ES6 source code it is necessary to compile on the fly.  This is achi
     ]
 }
 ```
-
-
-
